@@ -1,16 +1,16 @@
 {
   "name": "web-session",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Keep user sessions between visits",
   "repository": {
     "type": "git",
     "url": "git://github.com/gilbarbara/web-session.git"
   },
   "keywords": [
-    "google analytics",
-    "analytics",
     "web",
-    "session"
+    "session",
+    "analytics",
+    "google analytics"
   ],
   "author": "Gil Barbara <gilbarbara@gmail.com>",
   "license": "MIT",
