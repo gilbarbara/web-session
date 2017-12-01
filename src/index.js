@@ -10,7 +10,6 @@ export default class WebSession {
   constructor(options) {
     if (!hasLocalStorage()) {
       console.error('localStorage is not supported'); //eslint-disable-line no-console
-      return;
     }
 
     this.defaultOptions = {
@@ -32,13 +31,13 @@ export default class WebSession {
     this.sessionData = storage.get(this.options.name) || {
       origin: {
         createdAt: this.date.toISO(),
-        href: this.getLocation(),
+        href: this.href,
         referrer: document.referrer,
       },
       current: {
-        campaign: this.getCampaign(),
-        expiresAt: this.getExpirationDate(),
-        href: this.getLocation(),
+        campaign: this.campaign,
+        expiresAt: this.expirationDate,
+        href: this.href,
         referrer: document.referrer,
       },
       history: [],
@@ -48,21 +47,67 @@ export default class WebSession {
     this.update();
   }
 
-  getLocation(location = window.location) {
-    const { hash, pathname, search } = location;
+  update(data) {
+    /* istanbul ignore else */
+    const { current, history, origin, visits } = this.session;
+
+    const nextSession = {
+      ...data,
+      origin,
+      current: {
+        ...current,
+        expiresAt: this.expirationDate,
+      },
+      history,
+      visits,
+    };
+
+    if (this.isNewSession()) {
+      nextSession.current = {
+        href: this.href,
+        campaign: this.campaign,
+        expiresAt: this.expirationDate,
+        referrer: document.referrer,
+      };
+      nextSession.visits += 1;
+    }
+
+    if (this.hasNewCampaign()) {
+      nextSession.history.push({
+        createdAt: this.date.toISO(),
+        href: this.href,
+        referrer: document.referrer,
+      });
+    }
+
+    this.sessionData = nextSession;
+    this.options.callback(nextSession);
+    storage.set(this.options.name, nextSession);
+  }
+
+  get session() {
+    return this.sessionData || {};
+  }
+
+  get date() {
+    return DateTime.local().setZone(this.options.timezone);
+  }
+
+  get href() {
+    const { hash, pathname, search } = window.location;
 
     return `${pathname}${search}${hash}`;
   }
 
-  getCampaign(search = window.location.search) {
+  get campaign() {
     const { current } = this.session;
     const campaign = current ? current.campaign : {};
 
-    if (!search) {
+    if (!window.location.search) {
       return campaign;
     }
 
-    const nextCampaign = parseQuery(search)
+    const nextCampaign = parseQuery(window.location.search)
       .reduce((acc, [key, value]) => {
         /* istanbul ignore else */
         if (key.startsWith('utm_')) {
@@ -83,7 +128,7 @@ export default class WebSession {
     return campaign;
   }
 
-  getExpirationDate() {
+  get expirationDate() {
     return this.date.plus({ minutes: this.options.duration }).toISO();
   }
 
@@ -127,60 +172,10 @@ export default class WebSession {
   hasNewCampaign() {
     const { current } = this.session;
 
-    return !shallowCompare(current.campaign, this.getCampaign());
+    return !shallowCompare(current.campaign, this.campaign);
   }
 
   hasSession() {
     return !!storage.get(this.options.name);
-  }
-
-  setSession(data) {
-    /* istanbul ignore else */
-    const { current, history, origin, visits } = this.session;
-
-    const nextSession = {
-      ...data,
-      origin,
-      current: {
-        ...current,
-        expiresAt: this.getExpirationDate(),
-      },
-      history,
-      visits,
-    };
-
-    if (this.isNewSession()) {
-      nextSession.current = {
-        href: this.getLocation(),
-        campaign: this.getCampaign(),
-        expiresAt: this.getExpirationDate(),
-        referrer: document.referrer,
-      };
-      nextSession.visits += 1;
-    }
-
-    if (this.hasNewCampaign()) {
-      nextSession.history.push({
-        createdAt: this.date.toISO(),
-        href: this.getLocation(),
-        referrer: document.referrer,
-      });
-    }
-
-    this.sessionData = nextSession;
-    this.options.callback(nextSession);
-    storage.set(this.options.name, nextSession);
-  }
-
-  update = () => {
-    this.setSession(this.sessionData);
-  };
-
-  get session() {
-    return this.sessionData || {};
-  }
-
-  get date() {
-    return DateTime.local().setZone(this.options.timezone);
   }
 }
