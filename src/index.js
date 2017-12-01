@@ -52,7 +52,6 @@ export default class WebSession {
     const { current, history, origin, visits } = this.session;
 
     const nextSession = {
-      ...data,
       origin,
       current: {
         ...current,
@@ -61,6 +60,10 @@ export default class WebSession {
       history,
       visits,
     };
+
+    if (data) {
+      nextSession.data = data;
+    }
 
     if (this.isNewSession()) {
       nextSession.current = {
@@ -83,7 +86,7 @@ export default class WebSession {
     this.sessionData = nextSession;
     this.options.callback(nextSession);
     storage.set(this.options.name, nextSession);
-  }
+  };
 
   get session() {
     return this.sessionData || {};
@@ -146,22 +149,6 @@ export default class WebSession {
   }
 
   isNewSession() {
-    /*
-    if (
-      [
-        !this.hasSession(),
-        this.hasNewCampaign(),
-        this.isExpired(), // a new day
-      ].some(d => d)
-    ) {
-      console.log({
-        '!hasSession': !this.hasSession(),
-        'hasNewCampaign': this.hasNewCampaign(),
-        'is expired': this.isExpired(),
-      });
-    }
-    */
-
     return [
       !this.hasSession(),
       this.hasNewCampaign(), // campaign has changed

@@ -19,7 +19,7 @@ describe('WebSession', () => {
   let webSession;
   let clock;
 
-  describe('using the default options', () => {
+  describe('with the default options', () => {
     beforeAll(() => {
       cleanUp();
 
@@ -257,7 +257,7 @@ describe('WebSession', () => {
     });
   });
 
-  describe('using custom duration (60)', () => {
+  describe('with custom duration (60)', () => {
     beforeAll(() => {
       cleanUp();
 
@@ -332,6 +332,49 @@ describe('WebSession', () => {
 
       expect(mockCallback).lastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(3);
+    });
+  });
+
+  describe('with custom data', () => {
+    beforeAll(() => {
+      cleanUp();
+
+      clock = lolex.install({
+        now: new Date('1999-12-31 23:15:00'),
+      });
+
+      webSession = new WebSession({
+        callback: mockCallback
+      });
+      webSession.update({
+        purchases: 1
+      });
+    });
+
+    afterAll(() => {
+      lolex.uninstall();
+    });
+
+    it('should start a new session', () => {
+      expect(webSession.session)
+        .toEqual({
+          current: {
+            campaign: {},
+            expiresAt: '1999-12-31T23:45:00.000Z',
+            href: '/',
+            referrer: '',
+          },
+          origin: {
+            createdAt: '1999-12-31T23:15:00.000Z',
+            href: '/',
+            referrer: '',
+          },
+          data: {
+            purchases: 1,
+          },
+          history: [],
+          visits: 1
+        });
     });
   });
 
