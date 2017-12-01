@@ -15,6 +15,7 @@ export default class WebSession {
     this.defaultOptions = {
       callback: () => {},
       duration: 30,
+      historySize: 50,
       name: 'WebSessionData',
       timezone: 'UTC',
     };
@@ -49,7 +50,7 @@ export default class WebSession {
 
   update = data => {
     /* istanbul ignore else */
-    const { current, history, origin, visits } = this.session;
+    const { current, origin, visits } = this.session;
 
     const nextSession = {
       origin,
@@ -57,7 +58,7 @@ export default class WebSession {
         ...current,
         expiresAt: this.expirationDate,
       },
-      history,
+      history: this.history,
       visits,
     };
 
@@ -88,20 +89,6 @@ export default class WebSession {
     storage.set(this.options.name, nextSession);
   };
 
-  get session() {
-    return this.sessionData || {};
-  }
-
-  get date() {
-    return DateTime.local().setZone(this.options.timezone);
-  }
-
-  get href() {
-    const { hash, pathname, search } = window.location;
-
-    return `${pathname}${search}${hash}`;
-  }
-
   get campaign() {
     const { current } = this.session;
     const campaign = current ? current.campaign : {};
@@ -131,8 +118,29 @@ export default class WebSession {
     return campaign;
   }
 
+  get date() {
+    return DateTime.local().setZone(this.options.timezone);
+  }
+
   get expirationDate() {
     return this.date.plus({ minutes: this.options.duration }).toISO();
+  }
+
+  get history() {
+    const { history } = this.session;
+    const { historySize } = this.options;
+
+    return historySize ? history.slice(history.length - historySize, historySize) : history;
+  }
+
+  get href() {
+    const { hash, pathname, search } = window.location;
+
+    return `${pathname}${search}${hash}`;
+  }
+
+  get session() {
+    return this.sessionData || {};
   }
 
   getDateFromISO(iso) {

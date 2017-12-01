@@ -5,17 +5,17 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/d81d926e61fefdb7a9e3/maintainability)](https://codeclimate.com/github/gilbarbara/web-session/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/d81d926e61fefdb7a9e3/test_coverage)](https://codeclimate.com/github/gilbarbara/web-session/test_coverage)
 
-How many sessions does it takes for an user to create an account? Or purchase something?  
+How many sessions does it takes for an user to create an account? Or purchase something?
 Now you can track these metrics!
 
 ***What is a session anyway?***  
-This is how a web session is defined by Google Analytics:  
+This is how a web session is defined by Google Analytics:
 
 ```
 a period of time (30 minutes by default) that is extended automatically upon user interaction.
 ```
 
-***How does it ends?***    
+***How does it ends?***
 
 - after 30 minutes of inactivity.
 - at midnight (based on your GA settings, not client timezone).
@@ -51,6 +51,8 @@ You can pass an object to `update()` with custom data you might want in your ses
 
 **duration** {number}: The duration of the session in minutes. Defaults to `30`
 
+**historySize** {number}: The max number of visits's history to keep. Defaults to `50`
+
 **name** {string}: The name of the session in localStorage. Defaults to `WebSessionData`
 
 **timezone** {number}: The timezone used in GA. Defaults to `UTC`
@@ -69,6 +71,9 @@ You can pass an object to `update()` with custom data you might want in your ses
     href: '/',
     referrer: ''
   },
+  data: { // if using the optional data parameter with update
+    something: true
+  }
   history: [ // the different campaigns the user has entered in your site
     {
       createdAt: '2000-01-01T00:15:00.000Z',
