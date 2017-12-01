@@ -50,6 +50,8 @@
     "watch": "npm run build:commonjs -- -w",
     "clean": "rimraf es && rimraf lib",
     "lint": "eslint --ext .js --ext .jsx src test",
+    "test": "TZ=UTC jest --coverage",
+    "test:watch": "TZ=UTC jest --watch",
     "precommit": "npm run lint && npm test",
     "prepublishOnly": "npm run build"
   }
