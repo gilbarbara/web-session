@@ -47,7 +47,7 @@ export default class WebSession {
     this.update();
   }
 
-  update(data) {
+  update = data => {
     /* istanbul ignore else */
     const { current, history, origin, visits } = this.session;
 
