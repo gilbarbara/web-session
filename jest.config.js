@@ -12,11 +12,14 @@ module.exports = {
     './',
   ],
   setupFiles: [
-    '<rootDir>/test/__setup__/shim.js',
-    '<rootDir>/test/__setup__/index.js',
-    'jest-localstorage-mock',
+    '<rootDir>/test/__setup__/setupFiles.js'
   ],
+  testEnvironment: 'jest-environment-jsdom-global',
+  testEnvironmentOptions: {
+    resources: 'usable',
+  },
   testRegex: '/test/.*?\\.(test|spec)\\.js$',
+  testURL: 'http://localhost:3000',
   collectCoverage: false,
   collectCoverageFrom: [
     'src/**/*.js',
