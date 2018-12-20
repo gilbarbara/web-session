@@ -3,14 +3,8 @@ import WebSession from '../src/index';
 
 const mockCallback = jest.fn();
 
-const setLocation = ({ hash = '', pathname = '/', search = '' } = {}) => {
-  window.location.hash = hash;
-  window.location.pathname = pathname;
-  window.location.search = search;
-};
-
 const cleanUp = () => {
-  setLocation();
+  navigate({ pathname: '/' });
   localStorage.clear();
   mockCallback.mockClear();
 };
@@ -74,7 +68,7 @@ describe('WebSession', () => {
 
     it('should still be in the same session after 5 minutes', () => {
       clock.tick('05:00');
-      setLocation({ pathname: '/b' });
+      navigate({ pathname: '/b' });
 
       webSession.update();
 
@@ -84,7 +78,7 @@ describe('WebSession', () => {
 
     it('should start a new session after 30 minutes', () => {
       clock.tick('31:00');
-      setLocation({ pathname: '/c' });
+      navigate({ pathname: '/c' });
 
       webSession.update();
 
@@ -94,7 +88,7 @@ describe('WebSession', () => {
 
     it('should start a new session after midnight', () => {
       clock.tick('10:00');
-      setLocation({ pathname: '/e' });
+      navigate({ pathname: '/e' });
 
       webSession.update();
 
@@ -104,7 +98,7 @@ describe('WebSession', () => {
 
     it('should still be in the same session after 10 minutes', () => {
       clock.tick('10:00');
-      setLocation({ pathname: '/g' });
+      navigate({ pathname: '/g' });
 
       webSession.update();
 
@@ -117,7 +111,7 @@ describe('WebSession', () => {
       expect(webSession.session.history.length).toBe(0);
 
       clock.tick('10:00');
-      setLocation({ pathname: '/cpc', search: '?utm_source=cpc' });
+      navigate({ pathname: '/cpc', search: 'utm_source=cpc' });
 
       webSession.update();
 
@@ -128,7 +122,7 @@ describe('WebSession', () => {
 
     it('should still be in the same session after 5 minutes with a new query but no campaign', () => {
       clock.tick('05:00');
-      setLocation({ pathname: '/photos', search: '?color=red' });
+      navigate({ pathname: '/photos', search: 'color=red' });
 
       webSession.update();
 
@@ -138,7 +132,7 @@ describe('WebSession', () => {
 
     it('should still be in the same session after 5 but no params', () => {
       clock.tick('05:00');
-      setLocation({ pathname: '/about' });
+      navigate({ pathname: '/about' });
 
       webSession.update();
 
@@ -148,7 +142,7 @@ describe('WebSession', () => {
 
     it('should have started a new session after 10 minutes but with a new campaign', () => {
       clock.tick('10:00');
-      setLocation({ pathname: '/affiliate', search: '?utm_source=affiliate' });
+      navigate({ pathname: '/affiliate', search: 'utm_source=affiliate' });
 
       webSession.update();
 
@@ -159,7 +153,7 @@ describe('WebSession', () => {
 
     it('should have started a new session after 60 minutes', () => {
       clock.tick('01:00:00');
-      setLocation();
+      navigate();
 
       webSession.update();
 
@@ -169,7 +163,7 @@ describe('WebSession', () => {
 
     it('should have added a new campaign to the history', () => {
       clock.tick('10:00:00');
-      setLocation({ pathname: '/products/1234', search: '?gclid=3097hds92ghsd775sg72sg256rs2s35d3' });
+      navigate({ pathname: '/products/1234', search: 'gclid=3097hds92ghsd775sg72sg256rs2s35d3' });
 
       webSession.update();
 
@@ -218,7 +212,7 @@ describe('WebSession', () => {
 
     it('should still be in the same session after 5 minutes', () => {
       clock.tick('05:00');
-      setLocation({ pathname: '/b' });
+      navigate({ pathname: '/b' });
 
       webSession.update();
 
@@ -228,7 +222,7 @@ describe('WebSession', () => {
 
     it('should start a new session after 30 minutes', () => {
       clock.tick('31:00');
-      setLocation({ pathname: '/c' });
+      navigate({ pathname: '/c' });
 
       webSession.update();
 
@@ -238,7 +232,7 @@ describe('WebSession', () => {
 
     it('should start a new session a few hours later', () => {
       clock.tick('04:30:00');
-      setLocation({ pathname: '/e' });
+      navigate({ pathname: '/e' });
 
       webSession.update();
 
@@ -248,7 +242,7 @@ describe('WebSession', () => {
 
     it('should start a new session after midnight', () => {
       clock.tick('10:00');
-      setLocation({ pathname: '/f' });
+      navigate({ pathname: '/f' });
 
       webSession.update();
 
@@ -296,7 +290,7 @@ describe('WebSession', () => {
 
     it('should still be in the same session after 45 minutes', () => {
       clock.tick('45:00');
-      setLocation({ pathname: '/b' });
+      navigate({ pathname: '/b' });
 
       webSession.update();
 
@@ -306,7 +300,7 @@ describe('WebSession', () => {
 
     it('should start a new session after 60 minutes', () => {
       clock.tick('01:15:00');
-      window.location.pathname = '/c';
+      navigate({ pathname: '/c' });
 
       webSession.update();
 
@@ -316,7 +310,7 @@ describe('WebSession', () => {
 
     it('should start a new session after midnight', () => {
       clock.tick('45:00');
-      setLocation({ pathname: '/e' });
+      navigate({ pathname: '/e' });
 
       webSession.update();
 
@@ -326,7 +320,7 @@ describe('WebSession', () => {
 
     it('should still be in the same session after 10 minutes', () => {
       clock.tick('50:00');
-      setLocation({ pathname: '/f' });
+      navigate({ pathname: '/f' });
 
       webSession.update();
 
@@ -405,4 +399,3 @@ describe('WebSession', () => {
     });
   });
 });
-
