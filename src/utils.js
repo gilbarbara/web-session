@@ -7,8 +7,7 @@ export function hasLocalStorage() {
       storage.setItem(testKey, '1');
       storage.removeItem(testKey);
       window.isLocalStorageSupported = true;
-    }
-    catch (error) {
+    } catch (error) {
       window.isLocalStorageSupported = false;
     }
   }
@@ -21,7 +20,8 @@ export function shallowCompare(a, b) {
 }
 
 export function parseQuery(query) {
-  return query.slice(1)
+  return query
+    .slice(1)
     .split('&')
     .map(d => {
       const [key, value] = d.split('=');
