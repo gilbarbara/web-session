@@ -1,10 +1,5 @@
 import { DateTime } from 'luxon';
-import {
-  hasLocalStorage,
-  parseQuery,
-  shallowCompare,
-  storage,
-} from './utils';
+import { hasLocalStorage, parseQuery, shallowCompare, storage } from './utils';
 
 export default class WebSession {
   constructor(options) {
@@ -97,19 +92,18 @@ export default class WebSession {
       return campaign;
     }
 
-    const nextCampaign = parseQuery(window.location.search)
-      .reduce((acc, [key, value]) => {
-        /* istanbul ignore else */
-        if (key.startsWith('utm_')) {
-          acc[key.slice(4)] = value;
-        }
+    const nextCampaign = parseQuery(window.location.search).reduce((acc, [key, value]) => {
+      /* istanbul ignore else */
+      if (key.startsWith('utm_')) {
+        acc[key.slice(4)] = value;
+      }
 
-        if (key.startsWith('gclid')) {
-          acc[key] = value;
-        }
+      if (key.startsWith('gclid')) {
+        acc[key] = value;
+      }
 
-        return acc;
-      }, {});
+      return acc;
+    }, {});
 
     if (Object.keys(nextCampaign).length) {
       return nextCampaign;
@@ -153,7 +147,7 @@ export default class WebSession {
     const expiresAt = this.getDateFromISO(current.expiresAt);
     const issuedAt = expiresAt.minus({ minutes: this.options.duration });
 
-    return (this.date.toISODate() !== issuedAt.toISODate()) || (expiresAt < this.date);
+    return this.date.toISODate() !== issuedAt.toISODate() || expiresAt < this.date;
   }
 
   isNewSession() {

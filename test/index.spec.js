@@ -31,22 +31,21 @@ describe('WebSession', () => {
     });
 
     it('should start a new session', () => {
-      expect(webSession.session)
-        .toEqual({
-          current: {
-            campaign: {},
-            expiresAt: '1999-12-31T23:45:00.000Z',
-            href: '/',
-            referrer: '',
-          },
-          origin: {
-            createdAt: '1999-12-31T23:15:00.000Z',
-            href: '/',
-            referrer: '',
-          },
-          history: [],
-          visits: 1
-        });
+      expect(webSession.session).toEqual({
+        current: {
+          campaign: {},
+          expiresAt: '1999-12-31T23:45:00.000Z',
+          href: '/',
+          referrer: '',
+        },
+        origin: {
+          createdAt: '1999-12-31T23:15:00.000Z',
+          href: '/',
+          referrer: '',
+        },
+        history: [],
+        visits: 1,
+      });
     });
 
     it('should have created the storage items', () => {
@@ -106,7 +105,7 @@ describe('WebSession', () => {
       expect(webSession.session.visits).toBe(3);
     });
 
-    it('should have started a new session after 10 minutes because there\'s a campaign', () => {
+    it("should have started a new session after 10 minutes because there's a campaign", () => {
       // this will be the first campaign
       expect(webSession.session.history.length).toBe(0);
 
@@ -192,22 +191,21 @@ describe('WebSession', () => {
     });
 
     it('should start a new session', () => {
-      expect(webSession.session)
-        .toEqual({
-          current: {
-            campaign: {},
-            expiresAt: '1999-12-31T18:45:00.000-05:00',
-            href: '/',
-            referrer: '',
-          },
-          origin: {
-            createdAt: '1999-12-31T18:15:00.000-05:00',
-            href: '/',
-            referrer: '',
-          },
-          history: [],
-          visits: 1
-        });
+      expect(webSession.session).toEqual({
+        current: {
+          campaign: {},
+          expiresAt: '1999-12-31T18:45:00.000-05:00',
+          href: '/',
+          referrer: '',
+        },
+        origin: {
+          createdAt: '1999-12-31T18:15:00.000-05:00',
+          href: '/',
+          referrer: '',
+        },
+        history: [],
+        visits: 1,
+      });
     });
 
     it('should still be in the same session after 5 minutes', () => {
@@ -270,22 +268,21 @@ describe('WebSession', () => {
     });
 
     it('should start a new session', () => {
-      expect(webSession.session)
-        .toEqual({
-          current: {
-            campaign: {},
-            expiresAt: '1999-12-31T22:15:00.000Z',
-            href: '/',
-            referrer: '',
-          },
-          origin: {
-            createdAt: '1999-12-31T21:15:00.000Z',
-            href: '/',
-            referrer: '',
-          },
-          history: [],
-          visits: 1
-        });
+      expect(webSession.session).toEqual({
+        current: {
+          campaign: {},
+          expiresAt: '1999-12-31T22:15:00.000Z',
+          href: '/',
+          referrer: '',
+        },
+        origin: {
+          createdAt: '1999-12-31T21:15:00.000Z',
+          href: '/',
+          referrer: '',
+        },
+        history: [],
+        visits: 1,
+      });
     });
 
     it('should still be in the same session after 45 minutes', () => {
@@ -338,10 +335,10 @@ describe('WebSession', () => {
       });
 
       webSession = new WebSession({
-        callback: mockCallback
+        callback: mockCallback,
       });
       webSession.update({
-        purchases: 1
+        purchases: 1,
       });
     });
 
@@ -350,25 +347,24 @@ describe('WebSession', () => {
     });
 
     it('should start a new session', () => {
-      expect(webSession.session)
-        .toEqual({
-          current: {
-            campaign: {},
-            expiresAt: '1999-12-31T23:45:00.000Z',
-            href: '/',
-            referrer: '',
-          },
-          origin: {
-            createdAt: '1999-12-31T23:15:00.000Z',
-            href: '/',
-            referrer: '',
-          },
-          data: {
-            purchases: 1,
-          },
-          history: [],
-          visits: 1
-        });
+      expect(webSession.session).toEqual({
+        current: {
+          campaign: {},
+          expiresAt: '1999-12-31T23:45:00.000Z',
+          href: '/',
+          referrer: '',
+        },
+        origin: {
+          createdAt: '1999-12-31T23:15:00.000Z',
+          href: '/',
+          referrer: '',
+        },
+        data: {
+          purchases: 1,
+        },
+        history: [],
+        visits: 1,
+      });
     });
   });
 
@@ -394,7 +390,7 @@ describe('WebSession', () => {
         current: { campaign: {}, expiresAt: '1999-12-31T23:45:00.000Z', href: '/', referrer: '' },
         history: [],
         origin: { createdAt: '1999-12-31T23:15:00.000Z', href: '/', referrer: '' },
-        visits: 2
+        visits: 2,
       });
     });
   });
