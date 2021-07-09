@@ -1,25 +1,33 @@
-import lolex from 'lolex';
+import { advanceBy, advanceTo, clear } from 'jest-date-mock';
+
 import WebSession from '../src/index';
 
 const mockCallback = jest.fn();
 
-const cleanUp = () => {
+function cleanUp() {
   navigate({ pathname: '/' });
   localStorage.clear();
   mockCallback.mockClear();
-};
+}
+
+function tick(input, inMinutes) {
+  let value = input;
+
+  if (inMinutes) {
+    value = input * 60;
+  }
+
+  advanceBy(value * 1000);
+}
 
 describe('WebSession', () => {
   let webSession;
-  let clock;
 
   describe('with the default options', () => {
     beforeAll(() => {
       cleanUp();
 
-      clock = lolex.install({
-        now: new Date('1999-12-31 23:15:00'),
-      });
+      advanceTo(new Date('1999-12-31 23:15:00'));
 
       webSession = new WebSession({
         callback: mockCallback,
@@ -27,7 +35,7 @@ describe('WebSession', () => {
     });
 
     afterAll(() => {
-      lolex.uninstall();
+      clear();
     });
 
     it('should start a new session', () => {
@@ -54,120 +62,121 @@ describe('WebSession', () => {
 
     it('should extend the session by 15 seconds', () => {
       const { current } = webSession.session;
-      clock.tick('15');
+
+      tick(15);
 
       webSession.update();
 
       const { current: next } = webSession.session;
 
       expect(current.expiresAt !== next.expiresAt).toBe(true);
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(1);
     });
 
     it('should still be in the same session after 5 minutes', () => {
-      clock.tick('05:00');
+      tick(5, true);
       navigate({ pathname: '/b' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(1);
     });
 
     it('should start a new session after 30 minutes', () => {
-      clock.tick('31:00');
+      tick(31, true);
       navigate({ pathname: '/c' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(2);
     });
 
     it('should start a new session after midnight', () => {
-      clock.tick('10:00');
+      tick(10, true);
       navigate({ pathname: '/e' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(3);
     });
 
     it('should still be in the same session after 10 minutes', () => {
-      clock.tick('10:00');
+      tick(10, true);
       navigate({ pathname: '/g' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(3);
     });
 
     it("should have started a new session after 10 minutes because there's a campaign", () => {
       // this will be the first campaign
-      expect(webSession.session.history.length).toBe(0);
+      expect(webSession.session.history).toHaveLength(0);
 
-      clock.tick('10:00');
+      tick(10, true);
       navigate({ pathname: '/cpc', search: 'utm_source=cpc' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(4);
-      expect(webSession.session.history.length).toBe(1);
+      expect(webSession.session.history).toHaveLength(1);
     });
 
     it('should still be in the same session after 5 minutes with a new query but no campaign', () => {
-      clock.tick('05:00');
+      tick(5, true);
       navigate({ pathname: '/photos', search: 'color=red' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(4);
     });
 
     it('should still be in the same session after 5 but no params', () => {
-      clock.tick('05:00');
+      tick(5, true);
       navigate({ pathname: '/about' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(4);
     });
 
     it('should have started a new session after 10 minutes but with a new campaign', () => {
-      clock.tick('10:00');
+      tick(10, true);
       navigate({ pathname: '/affiliate', search: 'utm_source=affiliate' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
-      expect(webSession.session.history.length).toBe(2);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
+      expect(webSession.session.history).toHaveLength(2);
       expect(webSession.session.visits).toBe(5);
     });
 
     it('should have started a new session after 60 minutes', () => {
-      clock.tick('01:00:00');
+      tick(60, true);
       navigate();
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(6);
     });
 
     it('should have added a new campaign to the history', () => {
-      clock.tick('10:00:00');
+      tick(600, true);
       navigate({ pathname: '/products/1234', search: 'gclid=3097hds92ghsd775sg72sg256rs2s35d3' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
-      expect(webSession.session.history.length).toBe(3);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
+      expect(webSession.session.history).toHaveLength(3);
       expect(webSession.session.visits).toBe(7);
     });
   });
@@ -176,9 +185,7 @@ describe('WebSession', () => {
     beforeAll(() => {
       cleanUp();
 
-      clock = lolex.install({
-        now: new Date('1999-12-31 23:15:00'),
-      });
+      advanceTo(new Date('1999-12-31 23:15:00'));
 
       webSession = new WebSession({
         callback: mockCallback,
@@ -187,7 +194,7 @@ describe('WebSession', () => {
     });
 
     afterAll(() => {
-      lolex.uninstall();
+      clear();
     });
 
     it('should start a new session', () => {
@@ -209,42 +216,42 @@ describe('WebSession', () => {
     });
 
     it('should still be in the same session after 5 minutes', () => {
-      clock.tick('05:00');
+      tick(5, true);
       navigate({ pathname: '/b' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(1);
     });
 
     it('should start a new session after 30 minutes', () => {
-      clock.tick('31:00');
+      tick(31, true);
       navigate({ pathname: '/c' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(2);
     });
 
     it('should start a new session a few hours later', () => {
-      clock.tick('04:30:00');
+      tick(270, true);
       navigate({ pathname: '/e' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(3);
     });
 
     it('should start a new session after midnight', () => {
-      clock.tick('10:00');
+      tick(10, true);
       navigate({ pathname: '/f' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(4);
     });
   });
@@ -253,9 +260,7 @@ describe('WebSession', () => {
     beforeAll(() => {
       cleanUp();
 
-      clock = lolex.install({
-        now: new Date('1999-12-31 21:15:00'),
-      });
+      advanceTo(new Date('1999-12-31 21:15:00'));
 
       webSession = new WebSession({
         callback: mockCallback,
@@ -264,7 +269,7 @@ describe('WebSession', () => {
     });
 
     afterAll(() => {
-      lolex.uninstall();
+      clear();
     });
 
     it('should start a new session', () => {
@@ -286,42 +291,42 @@ describe('WebSession', () => {
     });
 
     it('should still be in the same session after 45 minutes', () => {
-      clock.tick('45:00');
+      tick(45, true);
       navigate({ pathname: '/b' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(1);
     });
 
     it('should start a new session after 60 minutes', () => {
-      clock.tick('01:15:00');
+      tick(75, true);
       navigate({ pathname: '/c' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(2);
     });
 
     it('should start a new session after midnight', () => {
-      clock.tick('45:00');
+      tick(45, true);
       navigate({ pathname: '/e' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(3);
     });
 
     it('should still be in the same session after 10 minutes', () => {
-      clock.tick('50:00');
+      tick(50, true);
       navigate({ pathname: '/f' });
 
       webSession.update();
 
-      expect(mockCallback).lastCalledWith(webSession.session);
+      expect(mockCallback).toHaveBeenLastCalledWith(webSession.session);
       expect(webSession.session.visits).toBe(3);
     });
   });
@@ -330,9 +335,7 @@ describe('WebSession', () => {
     beforeAll(() => {
       cleanUp();
 
-      clock = lolex.install({
-        now: new Date('1999-12-31 23:15:00'),
-      });
+      advanceTo(new Date('1999-12-31 23:15:00'));
 
       webSession = new WebSession({
         callback: mockCallback,
@@ -343,7 +346,7 @@ describe('WebSession', () => {
     });
 
     afterAll(() => {
-      lolex.uninstall();
+      clear();
     });
 
     it('should start a new session', () => {
@@ -371,18 +374,18 @@ describe('WebSession', () => {
   describe('without localStorage', () => {
     beforeAll(() => {
       window.isLocalStorageSupported = false;
+      jest.spyOn(console, 'error').mockImplementation(() => undefined);
       cleanUp();
 
-      clock = lolex.install({
-        now: new Date('1999-12-31 23:15:00'),
-      });
+      advanceTo(new Date('1999-12-31 23:15:00'));
 
       webSession = new WebSession();
       webSession.update();
     });
 
     afterAll(() => {
-      lolex.uninstall();
+      jest.restoreAllMocks();
+      clear();
     });
 
     it('should start a new session', () => {

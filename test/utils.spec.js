@@ -19,7 +19,10 @@ describe('utils', () => {
         ['utm_campaign', 'flower'],
       ]);
 
-      expect(parseQuery('?color=green&size=lg')).toEqual([['color', 'green'], ['size', 'lg']]);
+      expect(parseQuery('?color=green&size=lg')).toEqual([
+        ['color', 'green'],
+        ['size', 'lg'],
+      ]);
     });
   });
 
@@ -48,9 +51,11 @@ describe('utils', () => {
       expect(shallowCompare('abc', 'abc')).toBe(true);
     });
 
-    expect(shallowCompare(0, 0)).toBe(true);
+    it('should compare mixed values', () => {
+      expect(shallowCompare(0, 0)).toBe(true);
 
-    expect(shallowCompare(0, '0')).toBe(false);
+      expect(shallowCompare(0, '0')).toBe(false);
+    });
   });
 
   describe('storage', () => {
@@ -60,7 +65,7 @@ describe('utils', () => {
       });
 
       it("should return null if there's no saved data", () => {
-        expect(storage.get('NEW')).toBe(null);
+        expect(storage.get('NEW')).toBeNull();
       });
 
       it('should save data', () => {
@@ -70,7 +75,7 @@ describe('utils', () => {
 
       it('should remove data', () => {
         storage.remove('NEW');
-        expect(storage.get('NEW')).toEqual(null);
+        expect(storage.get('NEW')).toBeNull();
       });
     });
 
@@ -80,13 +85,13 @@ describe('utils', () => {
       });
 
       it('should return null', () => {
-        expect(storage.get('NEW')).toBe(null);
+        expect(storage.get('NEW')).toBeNull();
       });
 
-      it('should return null', () => {
+      it('should return null after set', () => {
         storage.set('NEW', {});
 
-        expect(storage.get('NEW')).toBe(null);
+        expect(storage.get('NEW')).toBeNull();
       });
     });
   });

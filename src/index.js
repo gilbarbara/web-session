@@ -1,10 +1,12 @@
 import { DateTime } from 'luxon';
+
 import { hasLocalStorage, parseQuery, shallowCompare, storage } from './utils';
 
 export default class WebSession {
   constructor(options) {
     if (!hasLocalStorage()) {
-      console.error('localStorage is not supported'); //eslint-disable-line no-console
+      // eslint-disable-next-line no-console
+      console.error('localStorage is not supported');
     }
 
     this.defaultOptions = {
@@ -127,6 +129,7 @@ export default class WebSession {
     return historySize ? history.slice(history.length - historySize, historySize) : history;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   get href() {
     const { hash, pathname, search } = window.location;
 

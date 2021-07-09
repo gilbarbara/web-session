@@ -1,6 +1,6 @@
-import 'jest-localstorage-mock';
+import 'jest-location-mock';
 
-global.navigate = (options = {}) => {
+window.navigate = (options = {}) => {
   const { pathname = location.pathname, search, hash } = options;
   let url = `${location.protocol}//${location.host}${pathname}`;
 
@@ -12,14 +12,14 @@ global.navigate = (options = {}) => {
     url += `#${hash}`;
   }
 
-  jsdom.reconfigure({ url });
+  window.location.assign(url);
 };
 
-global.requestAnimationFrame = callback => {
+window.requestAnimationFrame = callback => {
   setTimeout(callback, 0);
 };
 
-global.matchMedia = () => ({
+window.matchMedia = () => ({
   matches: false,
   addListener: () => {},
   removeListener: () => {},

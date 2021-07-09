@@ -1,6 +1,5 @@
 {
   "globals": {
-    "jsdom": false,
     "navigate": true
   },
   "rules": {
