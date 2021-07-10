@@ -65,6 +65,7 @@ describe('WebSession', () => {
     });
 
     it('should start a new session', () => {
+      webSession.init();
       expect(webSession.session).toEqual(getSession());
     });
 
@@ -210,6 +211,7 @@ describe('WebSession', () => {
     });
 
     it('should start a new session', () => {
+      webSession.init();
       expect(webSession.session).toEqual(
         getSession({}, '1999-12-31T18:15:00.000-05:00', '1999-12-31T18:45:00.000-05:00'),
       );
@@ -273,6 +275,7 @@ describe('WebSession', () => {
     });
 
     it('should start a new session', () => {
+      webSession.init();
       expect(webSession.session).toEqual(
         getSession({}, '1999-12-31T21:15:00.000Z', '1999-12-31T22:15:00.000Z'),
       );
@@ -328,6 +331,8 @@ describe('WebSession', () => {
       webSession = new WebSession({
         callback: mockCallback,
       });
+
+      webSession.init();
       webSession.update({
         purchases: 1,
       });
@@ -377,7 +382,6 @@ describe('WebSession', () => {
       advanceTo(new Date('1999-12-31 23:15:00'));
 
       webSession = new WebSession();
-      webSession.update();
     });
 
     afterAll(() => {
@@ -386,6 +390,9 @@ describe('WebSession', () => {
     });
 
     it('should start a new session', () => {
+      webSession.init();
+      webSession.update();
+
       expect(webSession.session).toEqual(getSession({ visits: 2 }));
     });
   });
