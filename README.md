@@ -48,10 +48,10 @@ webSession.update();
 <details>
   <summary>Type Definition</summary>
 
-export type AnyObject<T = any> = Record<string, T>;
-export type NarrowPlainObject<T> = Exclude<T, any[] | ((...items: any[]) => any)>;
-
   ```typescript
+type AnyObject<T = any> = Record<string, T>;
+type NarrowPlainObject<T> = Exclude<T, any[] | ((...items: any[]) => any)>;
+
 interface Options {
   /*
    * A function called on every update that receive the session data.
