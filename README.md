@@ -2,7 +2,7 @@
 
 [![NPM version](https://badge.fury.io/js/web-session.svg)](https://www.npmjs.com/package/web-session) [![build status](https://travis-ci.org/gilbarbara/web-session.svg)](https://travis-ci.org/gilbarbara/web-session) [![Maintainability](https://api.codeclimate.com/v1/badges/6e24b38c5c7a96de9db7/maintainability)](https://codeclimate.com/github/gilbarbara/web-session/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/6e24b38c5c7a96de9db7/test_coverage)](https://codeclimate.com/github/gilbarbara/web-session/test_coverage)
 
-How many sessions does it takes for an user to create an account? Or purchase something?
+How many sessions does it take for a user to create an account or purchase something?
 Now you can track these metrics!
 
 ***What is a session anyway?***  
@@ -12,14 +12,14 @@ This is how a web session is defined by Google Analytics:
 a period of time (30 minutes by default) that is extended automatically upon user interaction.
 ```
 
-***How does it ends?***
+***How does it end?***
 
 - after 30 minutes of inactivity.
 - at midnight (based on your GA settings, not client timezone).
-- campaing query change (utm or gclid)
+- campaign query change (utm or gclid)
 
 
-A simple demo for the [react](https://github.com/gilbarbara/react-web-session) implementation of this library that you use to inspect the session data:
+A simple demo for the [react](https://github.com/gilbarbara/react-web-session) implementation of this library that you can use to inspect the session data:
 
 [![Edit react-web-session demo](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/n40w8w88jl)
 
@@ -31,32 +31,87 @@ npm install --save web-session
 
 And create a new session:
 
-```js
+```typescript
 import WebSession from 'web-session';
 
-const webSession = new WebSession(options);
+const webSession = new WebSession();
 
-// After a location change or event dispatched to GA, call this function to update the session.
+// Initialize your session
+webSession.init();
+
+// After a location change or analytics event dispatched, call this function to update the session.
 webSession.update();
 ```
 
-You can pass an object to `update()` with custom data you might want in your session.
+## API
 
-## Options
+<details>
+  <summary>Type Definition</summary>
 
-**callback** {function}: A function to receive the session data on every update.
+export type AnyObject<T = any> = Record<string, T>;
+export type NarrowPlainObject<T> = Exclude<T, any[] | ((...items: any[]) => any)>;
 
-**duration** {number}: The duration of the session in minutes. Defaults to `30`
+  ```typescript
+interface Options {
+  /*
+   * A function called on every update that receive the session data.
+   * @default noop
+   */
+  callback: (session: Session) => void;
+  /*
+   * The session duration in minutes
+   * @default 30
+   */
+  duration: number;
+  /*
+   * The max history size
+   * @default 50
+   */
+  historySize: number;
+  /*
+   * The session name
+   * @default 'WebSessionData'
+   */
+  name: string;
+  /*
+   * The session timezone used in GA
+   * @default 'UTC'
+   */
+  timezone: string;
+}
 
-**historySize** {number}: The max number of visits's history to keep. Defaults to `50`
+interface Origin {
+  createdAt: string;
+  href: string;
+  referrer: string;
+}
 
-**name** {string}: The name of the session in localStorage. Defaults to `WebSessionData`
+interface Session {
+  current: CurrentSession;
+  data?: AnyObject;
+  history: Origin[];
+  origin: Origin;
+  visits: number;
+}
+  ```
+</details>
 
-**timezone** {number}: The timezone used in GA. Defaults to `UTC`
+**constructor(options?: Partial\<Options>)**  
+Create a new instance.
 
-### Stored data
-```js
-{
+**init(options?: Partial\<Options>)**  
+Initialize the session. You can change the session options here.
+
+**update<T = AnyObject>(data?: T & NarrowPlainObject<T>, replaceData = false)**  
+Update/Replace the session data.
+
+**session**  
+Get the current session.
+
+### Session data
+
+```typescript
+({
   origin: {
     createdAt: '2000-01-01T00:15:00.000Z',
     href: '/',
@@ -70,17 +125,16 @@ You can pass an object to `update()` with custom data you might want in your ses
   },
   data: { // if using the optional data parameter with update
     something: true
-  }
+  },
   history: [ // the different campaigns the user has entered in your site
     {
       createdAt: '2000-01-01T00:15:00.000Z',
       href: '/cpc?utm_source=cpc',
       referrer: ''
-    },
-    ...
+    }
   ],
   visits: 1
-}
+})
 ```
 
 ### References
