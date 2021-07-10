@@ -1,32 +1,25 @@
 import { DateTime } from 'luxon';
 
-import { hasLocalStorage, parseQuery, shallowCompare, storage } from './utils';
+import { defaultOptions, hasLocalStorage, parseQuery, shallowCompare, storage } from './helpers';
+import { AnyObject, NarrowPlainObject, Options, Session } from './types';
 
 export default class WebSession {
-  constructor(options) {
+  private readonly defaultOptions = defaultOptions;
+  private readonly options: Options;
+  private sessionData: Session;
+
+  constructor(options?: Partial<Options>) {
     if (!hasLocalStorage()) {
       // eslint-disable-next-line no-console
       console.error('localStorage is not supported');
     }
 
-    this.defaultOptions = {
-      callback: () => {},
-      duration: 30,
-      historySize: 50,
-      name: 'WebSessionData',
-      timezone: 'UTC',
-    };
-
-    this.init(options);
-  }
-
-  init(options = {}) {
     this.options = {
       ...this.defaultOptions,
       ...options,
     };
 
-    this.sessionData = storage.get(this.options.name) || {
+    this.sessionData = storage.get(this.options.name || '') || {
       origin: {
         createdAt: this.date.toISO(),
         href: this.href,
@@ -45,11 +38,11 @@ export default class WebSession {
     this.update();
   }
 
-  update = data => {
+  update = <T = AnyObject>(data?: T & NarrowPlainObject<T>, replaceData = false) => {
     /* istanbul ignore else */
-    const { current, origin, visits } = this.session;
+    const { current, data: currentData, origin, visits } = this.session;
 
-    const nextSession = {
+    const nextSession: Session = {
       origin,
       current: {
         ...current,
@@ -59,9 +52,12 @@ export default class WebSession {
       visits,
     };
 
-    if (data) {
-      nextSession.data = data;
-    }
+    nextSession.data = replaceData
+      ? data
+      : {
+          ...currentData,
+          ...data,
+        };
 
     if (this.isNewSession()) {
       nextSession.current = {
@@ -94,18 +90,18 @@ export default class WebSession {
       return campaign;
     }
 
-    const nextCampaign = parseQuery(window.location.search).reduce((acc, [key, value]) => {
+    const nextCampaign = parseQuery(window.location.search).reduce((accumulator, [key, value]) => {
       /* istanbul ignore else */
       if (key.startsWith('utm_')) {
-        acc[key.slice(4)] = value;
+        accumulator[key.slice(4)] = value;
       }
 
       if (key.startsWith('gclid')) {
-        acc[key] = value;
+        accumulator[key] = value;
       }
 
-      return acc;
-    }, {});
+      return accumulator;
+    }, {} as AnyObject);
 
     if (Object.keys(nextCampaign).length) {
       return nextCampaign;
@@ -129,7 +125,6 @@ export default class WebSession {
     return historySize ? history.slice(history.length - historySize, historySize) : history;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   get href() {
     const { hash, pathname, search } = window.location;
 
@@ -140,8 +135,8 @@ export default class WebSession {
     return this.sessionData || {};
   }
 
-  getDateFromISO(iso) {
-    return DateTime.fromISO(iso).setLocale(this.options.timezone);
+  getDateFromISO(date: string) {
+    return DateTime.fromISO(date).setLocale(this.options.timezone);
   }
 
   isExpired() {
@@ -171,3 +166,5 @@ export default class WebSession {
     return !!storage.get(this.options.name);
   }
 }
+
+export * from './types';

@@ -1,6 +1,8 @@
 import { advanceBy, advanceTo, clear } from 'jest-date-mock';
 
-import WebSession from '../src/index';
+import { navigate } from './__setup__/utils';
+
+import WebSession from '../src';
 
 const mockCallback = jest.fn();
 
@@ -10,7 +12,31 @@ function cleanUp() {
   mockCallback.mockClear();
 }
 
-function tick(input, inMinutes) {
+function getSession(
+  data = {},
+  createdAt = '1999-12-31T23:15:00.000Z',
+  expiresAt = '1999-12-31T23:45:00.000Z',
+) {
+  return {
+    current: {
+      campaign: {},
+      expiresAt,
+      href: '/',
+      referrer: '',
+    },
+    data: {},
+    origin: {
+      createdAt,
+      href: '/',
+      referrer: '',
+    },
+    history: [],
+    visits: 1,
+    ...data,
+  };
+}
+
+function tick(input: number, inMinutes?: boolean) {
   let value = input;
 
   if (inMinutes) {
@@ -21,7 +47,7 @@ function tick(input, inMinutes) {
 }
 
 describe('WebSession', () => {
-  let webSession;
+  let webSession: WebSession;
 
   describe('with the default options', () => {
     beforeAll(() => {
@@ -39,25 +65,11 @@ describe('WebSession', () => {
     });
 
     it('should start a new session', () => {
-      expect(webSession.session).toEqual({
-        current: {
-          campaign: {},
-          expiresAt: '1999-12-31T23:45:00.000Z',
-          href: '/',
-          referrer: '',
-        },
-        origin: {
-          createdAt: '1999-12-31T23:15:00.000Z',
-          href: '/',
-          referrer: '',
-        },
-        history: [],
-        visits: 1,
-      });
+      expect(webSession.session).toEqual(getSession());
     });
 
     it('should have created the storage items', () => {
-      expect(JSON.parse(localStorage.getItem('WebSessionData'))).toEqual(webSession.session);
+      expect(JSON.parse(localStorage.getItem('WebSessionData') || '')).toEqual(webSession.session);
     });
 
     it('should extend the session by 15 seconds', () => {
@@ -198,21 +210,9 @@ describe('WebSession', () => {
     });
 
     it('should start a new session', () => {
-      expect(webSession.session).toEqual({
-        current: {
-          campaign: {},
-          expiresAt: '1999-12-31T18:45:00.000-05:00',
-          href: '/',
-          referrer: '',
-        },
-        origin: {
-          createdAt: '1999-12-31T18:15:00.000-05:00',
-          href: '/',
-          referrer: '',
-        },
-        history: [],
-        visits: 1,
-      });
+      expect(webSession.session).toEqual(
+        getSession({}, '1999-12-31T18:15:00.000-05:00', '1999-12-31T18:45:00.000-05:00'),
+      );
     });
 
     it('should still be in the same session after 5 minutes', () => {
@@ -273,21 +273,9 @@ describe('WebSession', () => {
     });
 
     it('should start a new session', () => {
-      expect(webSession.session).toEqual({
-        current: {
-          campaign: {},
-          expiresAt: '1999-12-31T22:15:00.000Z',
-          href: '/',
-          referrer: '',
-        },
-        origin: {
-          createdAt: '1999-12-31T21:15:00.000Z',
-          href: '/',
-          referrer: '',
-        },
-        history: [],
-        visits: 1,
-      });
+      expect(webSession.session).toEqual(
+        getSession({}, '1999-12-31T21:15:00.000Z', '1999-12-31T22:15:00.000Z'),
+      );
     });
 
     it('should still be in the same session after 45 minutes', () => {
@@ -350,24 +338,33 @@ describe('WebSession', () => {
     });
 
     it('should start a new session', () => {
-      expect(webSession.session).toEqual({
-        current: {
-          campaign: {},
-          expiresAt: '1999-12-31T23:45:00.000Z',
-          href: '/',
-          referrer: '',
-        },
-        origin: {
-          createdAt: '1999-12-31T23:15:00.000Z',
-          href: '/',
-          referrer: '',
-        },
-        data: {
-          purchases: 1,
-        },
-        history: [],
-        visits: 1,
-      });
+      expect(webSession.session).toEqual(
+        getSession({
+          data: {
+            purchases: 1,
+          },
+        }),
+      );
+    });
+
+    it('should update session data', () => {
+      webSession.update({ likes: 3 });
+      webSession.update({ purchases: 2 });
+
+      expect(webSession.session).toEqual(
+        getSession({
+          data: {
+            likes: 3,
+            purchases: 2,
+          },
+        }),
+      );
+    });
+
+    it('should replace session data', () => {
+      webSession.update({}, true);
+
+      expect(webSession.session).toEqual(getSession());
     });
   });
 
@@ -389,12 +386,7 @@ describe('WebSession', () => {
     });
 
     it('should start a new session', () => {
-      expect(webSession.session).toEqual({
-        current: { campaign: {}, expiresAt: '1999-12-31T23:45:00.000Z', href: '/', referrer: '' },
-        history: [],
-        origin: { createdAt: '1999-12-31T23:15:00.000Z', href: '/', referrer: '' },
-        visits: 2,
-      });
+      expect(webSession.session).toEqual(getSession({ visits: 2 }));
     });
   });
 });

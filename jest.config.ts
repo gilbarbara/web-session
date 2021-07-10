@@ -1,24 +1,23 @@
 module.exports = {
   collectCoverage: false,
-  collectCoverageFrom: ['src/**/*.js'],
+  collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}'],
   coverageThreshold: {
     global: {
       branches: 90,
       functions: 90,
       lines: 90,
-      statements: 90
-    }
+      statements: 90,
+    },
   },
   moduleDirectories: ['node_modules', 'src', './'],
-  moduleFileExtensions: ['js', 'json'],
+  moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json'],
+  preset: 'ts-jest',
   resetMocks: false,
   setupFiles: ['jest-date-mock', 'jest-localstorage-mock'],
-  setupFilesAfterEnv: ['<rootDir>/test/__setup__/setupFilesAfterEnv.js'],
+  setupFilesAfterEnv: ['jest-location-mock'],
   testEnvironment: 'jsdom',
   testEnvironmentOptions: { resources: 'usable' },
-  testRegex: '/test/.*?\\.(test|spec)\\.js$',
+  testRegex: '/test/.*?\\.(test|spec)\\.ts$',
   testURL: 'http://localhost:3000',
-  transform: {
-    '.*': 'babel-jest'
-  }
+  verbose: false,
 };

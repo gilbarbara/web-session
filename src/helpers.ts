@@ -1,3 +1,13 @@
+import { Options } from './types';
+
+export const defaultOptions: Options = {
+  callback: () => undefined,
+  duration: 30,
+  historySize: 50,
+  name: 'WebSessionData',
+  timezone: 'UTC',
+};
+
 export function hasLocalStorage() {
   if (typeof window.isLocalStorageSupported === 'undefined') {
     const testKey = 'test';
@@ -7,7 +17,7 @@ export function hasLocalStorage() {
       storage.setItem(testKey, '1');
       storage.removeItem(testKey);
       window.isLocalStorageSupported = true;
-    } catch (error) {
+    } catch {
       window.isLocalStorageSupported = false;
     }
   }
@@ -15,11 +25,7 @@ export function hasLocalStorage() {
   return window.isLocalStorageSupported;
 }
 
-export function shallowCompare(a, b) {
-  return JSON.stringify(a) === JSON.stringify(b);
-}
-
-export function parseQuery(query) {
+export function parseQuery(query: string) {
   return query
     .slice(1)
     .split('&')
@@ -30,22 +36,28 @@ export function parseQuery(query) {
     });
 }
 
+export function shallowCompare(a: unknown, b: unknown) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
 export const storage = {
-  get(name) {
+  get(name: string) {
     /* istanbul ignore else */
     if (hasLocalStorage()) {
-      return JSON.parse(window.localStorage.getItem(name));
+      const item = window.localStorage.getItem(name);
+
+      return item ? JSON.parse(item) : null;
     }
 
     return null;
   },
-  set(name, data) {
+  set(name: string, data: unknown) {
     /* istanbul ignore else */
     if (hasLocalStorage()) {
       window.localStorage.setItem(name, JSON.stringify(data));
     }
   },
-  remove(name) {
+  remove(name: string) {
     /* istanbul ignore else */
     if (hasLocalStorage()) {
       window.localStorage.removeItem(name);

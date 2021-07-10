@@ -1,4 +1,4 @@
-import { hasLocalStorage, parseQuery, shallowCompare, storage } from '../src/utils';
+import { hasLocalStorage, parseQuery, shallowCompare, storage } from '../src/helpers';
 
 describe('utils', () => {
   describe('hasLocalStorage', () => {
