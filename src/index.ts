@@ -4,9 +4,8 @@ import { defaultOptions, hasLocalStorage, parseQuery, shallowCompare, storage } 
 import { AnyObject, NarrowPlainObject, Options, Session } from './types';
 
 export default class WebSession {
-  private readonly defaultOptions = defaultOptions;
-  private readonly options: Options;
-  private sessionData: Session;
+  private options: Options = defaultOptions;
+  private sessionData: Session | null = null;
 
   constructor(options?: Partial<Options>) {
     if (!hasLocalStorage()) {
@@ -15,30 +14,23 @@ export default class WebSession {
     }
 
     this.options = {
-      ...this.defaultOptions,
+      ...defaultOptions,
+      ...options,
+    };
+  }
+
+  public init(options?: Partial<Options>) {
+    this.options = {
+      ...this.options,
       ...options,
     };
 
-    this.sessionData = storage.get(this.options.name || '') || {
-      origin: {
-        createdAt: this.date.toISO(),
-        href: this.href,
-        referrer: document.referrer,
-      },
-      current: {
-        campaign: this.campaign,
-        expiresAt: this.expirationDate,
-        href: this.href,
-        referrer: document.referrer,
-      },
-      history: [],
-      visits: 0,
-    };
+    this.sessionData = this.getSessionData();
 
     this.update();
   }
 
-  update = <T = AnyObject>(data?: T & NarrowPlainObject<T>, replaceData = false) => {
+  public update = <T = AnyObject>(data?: T & NarrowPlainObject<T>, replaceData = false) => {
     /* istanbul ignore else */
     const { current, data: currentData, origin, visits } = this.session;
 
@@ -82,7 +74,11 @@ export default class WebSession {
     storage.set(this.options.name, nextSession);
   };
 
-  get campaign() {
+  private get campaign() {
+    if (!this.session) {
+      return {};
+    }
+
     const { current } = this.session;
     const campaign = current ? current.campaign : {};
 
@@ -110,36 +106,54 @@ export default class WebSession {
     return campaign;
   }
 
-  get date() {
+  private get date() {
     return DateTime.local().setZone(this.options.timezone);
   }
 
-  get expirationDate() {
+  private get expirationDate() {
     return this.date.plus({ minutes: this.options.duration }).toISO();
   }
 
-  get history() {
+  private get history() {
     const { history } = this.session;
     const { historySize } = this.options;
 
     return historySize ? history.slice(history.length - historySize, historySize) : history;
   }
 
-  get href() {
+  private get href() {
     const { hash, pathname, search } = window.location;
 
     return `${pathname}${search}${hash}`;
   }
 
   get session() {
-    return this.sessionData || {};
+    return (this.sessionData || {}) as Session;
   }
 
-  getDateFromISO(date: string) {
+  private getDateFromISO(date: string) {
     return DateTime.fromISO(date).setLocale(this.options.timezone);
   }
 
-  isExpired() {
+  private getSessionData() {
+    return (storage.get(this.options.name || '') || {
+      origin: {
+        createdAt: this.date.toISO(),
+        href: this.href,
+        referrer: document.referrer,
+      },
+      current: {
+        campaign: this.campaign,
+        expiresAt: this.expirationDate,
+        href: this.href,
+        referrer: document.referrer,
+      },
+      history: [],
+      visits: 0,
+    }) as Session;
+  }
+
+  private isExpired() {
     const { current } = this.session;
 
     const expiresAt = this.getDateFromISO(current.expiresAt);
@@ -148,7 +162,7 @@ export default class WebSession {
     return this.date.toISODate() !== issuedAt.toISODate() || expiresAt < this.date;
   }
 
-  isNewSession() {
+  private isNewSession() {
     return [
       !this.hasSession(),
       this.hasNewCampaign(), // campaign has changed
@@ -156,13 +170,13 @@ export default class WebSession {
     ].some(d => d);
   }
 
-  hasNewCampaign() {
+  private hasNewCampaign() {
     const { current } = this.session;
 
     return !shallowCompare(current.campaign, this.campaign);
   }
 
-  hasSession() {
+  private hasSession() {
     return !!storage.get(this.options.name);
   }
 }
