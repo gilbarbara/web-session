@@ -2,7 +2,7 @@
 
 [![NPM version](https://badge.fury.io/js/web-session.svg)](https://www.npmjs.com/package/web-session) [![build status](https://travis-ci.org/gilbarbara/web-session.svg)](https://travis-ci.org/gilbarbara/web-session) [![Maintainability](https://api.codeclimate.com/v1/badges/6e24b38c5c7a96de9db7/maintainability)](https://codeclimate.com/github/gilbarbara/web-session/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/6e24b38c5c7a96de9db7/test_coverage)](https://codeclimate.com/github/gilbarbara/web-session/test_coverage)
 
-How many sessions does it take for a user to create an account or purchase something?
+How many sessions does it take for a user to create an account or purchase something?  
 Now you can track these metrics!
 
 ***What is a session anyway?***  

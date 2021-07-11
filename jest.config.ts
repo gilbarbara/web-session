@@ -9,6 +9,11 @@ module.exports = {
       statements: 90,
     },
   },
+  globals: {
+    'ts-jest': {
+      tsconfig: 'test/tsconfig.json',
+    },
+  },
   moduleDirectories: ['node_modules', 'src', './'],
   moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json'],
   preset: 'ts-jest',

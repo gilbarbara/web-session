@@ -28,16 +28,14 @@
     "luxon": "^1.0.0"
   },
   "devDependencies": {
-    "@gilbarbara/eslint-config": "^0.1.5",
+    "@gilbarbara/eslint-config": "^0.1.6",
     "@gilbarbara/prettier-config": "^0.1.0",
     "@gilbarbara/tsconfig": "^0.1.0",
     "@size-limit/preset-small-lib": "^5.0.1",
     "@types/jest": "^26.0.24",
     "@types/luxon": "^1.27.1",
     "@types/node": "^16.3.1",
-    "cross-env": "^7.0.3",
     "del-cli": "^4.0.0",
-    "history": "^4.10.1",
     "husky": "^4.3.8",
     "is-ci-cli": "^2.2.0",
     "jest": "^27.0.6",
@@ -63,15 +61,11 @@
     "test:coverage": "TZ=UTC jest --coverage --bail",
     "test:watch": "TZ=UTC jest --watchAll --verbose",
     "typecheck": "tsc --noEmit",
-    "format": "prettier \"**/*.{js,jsx}\" --write",
+    "format": "prettier \"**/*.{ts,tsx}\" --write",
     "validate": "npm run lint && npm run typecheck && npm run test:coverage && npm run build && npm run size",
     "size": "size-limit",
     "prepublishOnly": "npm run validate"
   },
-  "browserslist": [
-    "> 0.2%",
-    "not dead"
-  ],
   "eslintConfig": {
     "extends": [
       "@gilbarbara/eslint-config"
